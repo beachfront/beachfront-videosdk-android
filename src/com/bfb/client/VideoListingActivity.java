@@ -39,17 +39,11 @@ public class VideoListingActivity extends Activity implements OnVideosFetch,
 	EditText search;
 
 	List<VideoEntity> videos = new ArrayList<VideoEntity>();
-
 	int displayHeight;
-
 	BFIOInterstitial interstitial;
-
 	ChannelAdaptor adaptor;
-
 	VideoEntity videoEntity;
-
 	ListView listView;
-
 	String videoStartId = null;
 
 	@Override
