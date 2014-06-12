@@ -6,7 +6,7 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 ## Requirements
 
 * BeachFront Media app id, app version & secret key
-* BeachFront Android SDK
+* BeachFront Android SDK (https://github.com/beachfront/beachfront-videosdk-android/tree/master/libs)
 * Android 2.2 and above
 * GSON jar
 
