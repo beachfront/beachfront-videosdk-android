@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ public class VideoPlayActivity extends Activity implements
 		title = (TextView) findViewById(R.id.title);
 		desc = (TextView) findViewById(R.id.desc);
 		videoView = (VideoViewBFB) findViewById(R.id.video_view);
+		videoView.setMediaController(new MediaController(this));
 		Bundle extras = getIntent().getExtras();
 		if (extras != null && extras.getString("video") != null) {
 			videoView.setOnPreparedListener(this);
