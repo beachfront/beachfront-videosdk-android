@@ -3,6 +3,18 @@
 ## Overview
 A more developer-friendly way of working with Beachfront Media Android SDK,  Simply add sdk & dependent jars & to your android project, call the appropriate methods, set the listerners and you're done :)
 
+## Features
+
+*  Get video channels
+*  Get the videos from a channel supported by pagination
+*  Search videos from a channel or from all.
+*  Get detail of a specific video
+*  Video Player native component
+*  Supports video display both portrait and landscape.
+*  Monetize video with pre-roll ads using the backend monetization rules
+*  Robust Analytics - # installtion, video view our of the box 
+*  Revenue tracking
+
 ## Requirements
 
 * BeachFront Media app id, app version & secret key
