@@ -2,18 +2,17 @@
 <resources>
 
     <!-- Put your app secret key here -->
-    <!--
-    <string name="bfm_key">6a20e2e4-d902-463b-80f3-f7ef48f14b9a</string>
-    Put your app id here
-    <string name="bfm_id">271</string>
-    Put your app version here
-    <string name="bfm_version">1.0</string>
-    -->
 
+    <string name="bfm_key">6a20e2e4-d902-463b-80f3-f7ef48f14b9a</string>
+    <!-- Put your app id here -->
+    <string name="bfm_id">271</string>
+    <!-- Put your app version here -->
+    <string name="bfm_version">1.0</string>
+
+    <!--
     <string name="bfm_id">1</string>
     <string name="bfm_version">2</string>
     <string name="bfm_key">9f7f4513-502a-4ab1-8ad0-fd57e6518d8e</string>
-
-    <item name="bfm_build_dev" type="bool">true</item>
+    -->
 
 </resources>
