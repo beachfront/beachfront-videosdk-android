@@ -4,19 +4,29 @@
     android:layout_height="match_parent" >
 
     <TextView
-        android:id="@+id/screen_title"
+        android:id="@+id/channel_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="5dp"
         android:gravity="center"
         android:textSize="20sp"
         android:textStyle="bold" />
 
+    <EditText
+        android:id="@+id/search_edit_box"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:hint="@string/video_listing_search"
+        android:imeOptions="actionSearch"
+        android:inputType="text" />
+
     <ListView
-        android:id="@+id/channel_list"
+        android:id="@+id/video_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/screen_title" >
+        android:layout_above="@id/search_edit_box"
+        android:layout_below="@id/channel_name" >
     </ListView>
 
 </RelativeLayout>

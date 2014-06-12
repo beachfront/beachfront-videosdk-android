@@ -1,4 +1,4 @@
-package com.bfb.client;
+package com.bfb.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

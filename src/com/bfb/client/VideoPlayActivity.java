@@ -7,10 +7,9 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.bfm.model.VideoEntity;
-import com.bfm.sdk.VideoSDK;
+import com.bfm.view.VideoViewBFB;
 import com.google.gson.Gson;
 
 public class VideoPlayActivity extends Activity implements
@@ -20,7 +19,7 @@ public class VideoPlayActivity extends Activity implements
 
 	TextView desc;
 
-	VideoView videoView = null;
+	VideoViewBFB videoView = null;
 
 	VideoEntity ve;
 
@@ -30,7 +29,7 @@ public class VideoPlayActivity extends Activity implements
 		setContentView(R.layout.video_play);
 		title = (TextView) findViewById(R.id.title);
 		desc = (TextView) findViewById(R.id.desc);
-		videoView = (VideoView) findViewById(R.id.video_view);
+		videoView = (VideoViewBFB) findViewById(R.id.video_view);
 		Bundle extras = getIntent().getExtras();
 		if (extras != null && extras.getString("video") != null) {
 			videoView.setOnPreparedListener(this);
@@ -46,28 +45,32 @@ public class VideoPlayActivity extends Activity implements
 	}
 
 	@Override
+	protected void onPause() {
+		videoView.onPause();
+		super.onPause();
+	}
+
+	@Override
+	protected void onStart() {
+		videoView.start(ve);
+		super.onStart();
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (videoView != null && videoView.isPlaying()) {
-			videoView.stopPlayback();
-			VideoSDK.getInstance(getApplicationContext()).videoEndTracker();
-		}
-
 	}
 
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		if (videoView != null && videoView.isPlaying()) {
-			videoView.stopPlayback();
-			VideoSDK.getInstance(getApplicationContext()).videoEndTracker();
-		}
+
 	}
 
 	@Override
 	protected void onResume() {
+		videoView.onResume();
 		super.onResume();
-		VideoSDK.getInstance(this).playVideo(ve, videoView);
 	}
 
 	@Override
@@ -79,13 +82,12 @@ public class VideoPlayActivity extends Activity implements
 
 	@Override
 	public void onPrepared(MediaPlayer mp) {
-		VideoSDK.getInstance(this).videoStartTracker(ve);
 
 	}
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
-		VideoSDK.getInstance(this).videoEndTracker();
+
 	}
 
 }

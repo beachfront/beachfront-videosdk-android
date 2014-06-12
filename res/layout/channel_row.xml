@@ -11,6 +11,7 @@
         android:layout_centerVertical="true"
         android:layout_margin="5dp"
         android:gravity="center"
-        android:textSize="15sp" />
+        android:padding="10dp"
+        android:textSize="18sp" />
 
 </RelativeLayout>

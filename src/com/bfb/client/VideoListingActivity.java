@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -18,58 +22,62 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.bfio.ad.BFIOErrorCode;
-import com.bfio.ad.BFIOInterstitial;
-import com.bfio.ad.BFIOInterstitial.InterstitialListener;
-import com.bfio.ad.model.BFIOInterstitalAd;
+import com.bfb.utils.DrawableManager;
 import com.bfm.api.Error;
-import com.bfm.listeners.OnVideosFetch;
+import com.bfm.listeners.VideosFetchListener;
 import com.bfm.model.VideoEntity;
 import com.bfm.sdk.VideoSDK;
 import com.google.gson.Gson;
 
-public class VideoListingActivity extends Activity implements OnVideosFetch,
-		InterstitialListener {
+public class VideoListingActivity extends Activity implements
+		VideosFetchListener {
 
-	TextView title;
-	EditText search;
-
-	List<VideoEntity> videos = new ArrayList<VideoEntity>();
-	int displayHeight;
-	BFIOInterstitial interstitial;
-	ChannelAdaptor adaptor;
-	VideoEntity videoEntity;
-	ListView listView;
-	String videoStartId = null;
+	private TextView title;
+	private EditText search;
+	private List<VideoEntity> videos = new ArrayList<VideoEntity>();
+	private int displayHeight;
+	private ChannelAdaptor adaptor;
+	private VideoEntity videoEntity;
+	private ListView listView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.video);
+		setContentView(R.layout.video_listing);
 		title = (TextView) findViewById(R.id.channel_name);
 		search = (EditText) findViewById(R.id.search_edit_box);
 		listView = (ListView) findViewById(R.id.video_list);
-		interstitial = new BFIOInterstitial(VideoListingActivity.this, this);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				videoEntity = (VideoEntity) view.getTag(R.id.video_id);
-				interstitial.requestInterstitial(
-						"xxxxx-xxxxx-xxxx-xxxxx-xxxxx-xxx", // appID
-						"xxxxx-xxxxx-xxxx-xxxxx-xxxxx-xxx"); // adUnitId
-				Toast.makeText(VideoListingActivity.this,
-						"Interstitial request sent", Toast.LENGTH_SHORT).show();
-
+				playVideo();
 			}
 		});
 		adaptor = new ChannelAdaptor();
 		listView.setAdapter(adaptor);
 		loadDisplay();
+		search.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+		search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+					InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputManager.hideSoftInputFromWindow(
+							search.getApplicationWindowToken(),
+							InputMethodManager.SHOW_FORCED);
+					search();
+					return true;
+				}
+				return false;
+			}
+
+		});
 	}
 
 	private void playVideo() {
@@ -153,13 +161,18 @@ public class VideoListingActivity extends Activity implements OnVideosFetch,
 		}
 	}
 
-	public void onClick(View view) {
+	public void search() {
 		videos.clear();
 		adaptor.notifyDataSetChanged();
-		VideoSDK.getInstance(this).searchVideos(this, 1, 30,
-				search.getText().toString(), true);
-		title.setText("Searching  Videos...");
-
+		if (!search.getText().toString().equals("")) {
+			VideoSDK.getInstance(this).searchVideos(this, 1, 30,
+					search.getText().toString(), true);
+			title.setText("Searching  Videos...");
+		} else {
+			Integer channedlId = getIntent().getExtras().getInt("channel_id");
+			VideoSDK.getInstance(this).getChannelVideos(this, 1, 30,
+					channedlId + "");
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -178,50 +191,6 @@ public class VideoListingActivity extends Activity implements OnVideosFetch,
 			title.setText(error.getErrorType().toString());
 		}
 
-	}
-
-	@Override
-	public void onInterstitialFailed(BFIOErrorCode errorCode) {
-		Toast.makeText(VideoListingActivity.this, "Interstitial not received",
-				Toast.LENGTH_SHORT).show();
-		playVideo();
-
-	}
-
-	@Override
-	public void onInterstitialClicked() {
-		Toast.makeText(VideoListingActivity.this, "Interstitial Clicked",
-				Toast.LENGTH_SHORT).show();
-
-	}
-
-	@Override
-	public void onInterstitialDismissed() {
-		Toast.makeText(VideoListingActivity.this, "Interstitial dismissed",
-				Toast.LENGTH_SHORT).show();
-		playVideo();
-	}
-
-	@Override
-	public void onReceiveInterstitial(BFIOInterstitalAd ad) {
-		Toast.makeText(VideoListingActivity.this, "Received interstitial",
-				Toast.LENGTH_SHORT).show();
-		interstitial.showInterstitial(ad);		
-
-	}
-
-	@Override
-	public void onInterstitialCompleted() {
-		Toast.makeText(VideoListingActivity.this,
-				"Interstitial play completed", Toast.LENGTH_SHORT).show();
-		playVideo();
-
-	}
-
-	@Override
-	public void onInterstitialStarted() {
-		Toast.makeText(VideoListingActivity.this, "Interstitial started",
-				Toast.LENGTH_SHORT).show();
 	}
 
 }

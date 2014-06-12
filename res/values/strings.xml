@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Client</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
+    <string name="app_name">Sample APP - Beachfrontbuilder</string>
 
     <color name="white">#ffffff</color>
 
     <dimen name="video_listing_item_duration_text_size">12sp</dimen>
     <dimen name="video_listing_item_title_text_size">15sp</dimen>
+
+    <string name="video_listing_search">Search videos</string>
 
     <item name="channel_id" type="id"></item>
     <item name="video_id" type="id"></item>
