@@ -12,7 +12,7 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 *  Video Player native component
 *  Supports video display both portrait and landscape.
 *  Monetize video with pre-roll ads using the backend monetization rules
-*  Robust Analytics - # installtion, video view our of the box 
+*  Robust Analytics - # installtion & video view is supported out of the box 
 *  Revenue tracking
 
 ## Requirements
