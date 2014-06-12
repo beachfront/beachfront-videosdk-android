@@ -3,7 +3,6 @@
 ## Overview
 A more developer-friendly way of working with Beachfront Media Android SDK,  Simply add sdk & dependent jars & to your android project, call the appropriate methods, set the listerners and you're done :)
 
-
 ## Requirements
 
 * BeachFront Media app id, app version & secret key
@@ -12,8 +11,8 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 * GSON jar
 
 
-
 ## Installation
+
 1. Download the BeachFront Android SDK & GSON jar file, copy into the lib folder of your Android Project
 
 2. Create a bfmconfig.xml file and with following content & put bfmconfig.xml file to res folder of your android project.
@@ -30,7 +29,6 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 
 </resources>
 ```
-
 
 ## Example Code
 
@@ -54,7 +52,7 @@ Following methods can be called from VideoSDK object which is a singleton class 
 Calling class need to implemente OnChannelsFetch interface or create the inner class. i.e 
 
 ```
- 	OnChannelsFetch onChannelsFetch = new OnChannelsFetch() {
+ 	ChannelsFetchListener onChannelsFetch = new ChannelsFetchListener() {
 
 			@Override
 			public void onChannelFetch(Error error, Set<Channel> channels) {
@@ -83,8 +81,8 @@ public void onChannelFetch(Error error, Set<Channel> channels)
 ```
 
 Channel - Containing channel meta data i.e id, name, order etc
-Error - Error details if something goes wrong
 
+Error - Error details if something goes wrong 
 
 #### Get Video from Channels
 
@@ -119,6 +117,7 @@ VideoSDK will fetch the videos in background thread and call the following metho
 ```
  
 #### Search Video
+
 Calling class need to implemente OnVideoFetch interface or create the inner class.
 
 To make the request, execute following method of VideoSDK
@@ -150,20 +149,24 @@ VideoSDK will fetch the videos in background thread and call the following metho
 	public void onVideosFetced(Error error, List<VideoEntity> videoEntites);
 ```
  
-#### Play Video 
+####  Video Player
  
-To make the request, execute following method of VideoSDK
+User BF Video Plaer in layout files
 
-```  
-	/**
-	 * Play video
-	 * @param video - Video need to be played
-	 * @param videoView - VideoView Object in which video need to be played
-	 */
-	public void playVideo(VideoEntity video, VideoView videoView) {
-		Utils.execute(new VideoPlayTask(video, videoView));
-	}
+
+``` 
+	<com.bfm.view.VideoViewBFB
+        android:id="@+id/video_view"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="50" />
 ```
+
+Calling activity/fragment should call following methods:
+
+1. Play the video : videoView.start(VideoEntry ve);
+2. videoView.onPause() should be called on onPause method
+3. videoView.onResume() should be called on onResume method
 
 ### Tracking API:
 
@@ -177,8 +180,7 @@ To make the request, execute following method of VideoSDK
 	
 ```
 
- 
-####  Session End - Called once at the app end point
+####  Session End - Call at the app end point. i.e. at onDestroy()
 
 ```
 	/**
@@ -188,29 +190,7 @@ To make the request, execute following method of VideoSDK
 
 ```
 
-####  Video Start - Called when video start playing
-
-```
-	/** 
-	 * Video Play start
-	 * 
-	 * @param video - Video object
-	 */
-	public void videoStartTracker(VideoEntity video) 
-	
-```
-
-####  Video End - Called when video end i.e video completed or interrupted by user. Video Start need to be called before video end.
-
-```
-	/**
-	 * Video End 
-	 */
-	public void videoEndTracker() {
-
-```
-
-####  Video Share - Called when video is shared to social networks i.e Facebook, Twitter 
+####  Video Share - Call when video is shared to social networks i.e Facebook, Twitter 
 
 ```
 	/**
