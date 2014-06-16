@@ -45,8 +45,8 @@ public class MainActivity extends BFMActivity implements ChannelsFetchListener {
 					int position, long id) {
 				Channel channel = (Channel) view.getTag(R.id.channel_id);
 				Toast.makeText(getApplicationContext(),
-						"Clicked on " + channel.getName() + position,
-						Toast.LENGTH_LONG).show();
+						"Clicked on " + channel.getName(), Toast.LENGTH_LONG)
+						.show();
 				Intent intent = new Intent(MainActivity.this,
 						VideoListingActivity.class);
 				intent.putExtra("channel_id", channel.getId());
@@ -69,8 +69,8 @@ public class MainActivity extends BFMActivity implements ChannelsFetchListener {
 		title.setText("Loading Channels...");
 	}
 
-	/**  
-	 * Will be called once get the response 	
+	/**
+	 * Will be called once get the response
 	 */
 	@Override
 	public void onChannelFetch(Error error, Set<Channel> channels) {

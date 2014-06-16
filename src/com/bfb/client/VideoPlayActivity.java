@@ -1,37 +1,55 @@
 package com.bfb.client;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
-import android.widget.MediaController;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bfm.model.VideoEntity;
-import com.bfm.view.VideoViewBFB;
+import com.bfm.view.VideoViewBFBP;
 import com.google.gson.Gson;
 
 public class VideoPlayActivity extends Activity implements
 		OnCompletionListener, MediaPlayer.OnPreparedListener, OnErrorListener {
 
-	TextView title;
+	private TextView title;
 
-	TextView desc;
+	private TextView desc;
 
-	VideoViewBFB videoView = null;
+	private VideoViewBFBP videoView = null;
+
+	private DisplayMetrics displaymetrics = new DisplayMetrics();
 
 	VideoEntity ve;
+
+	View video_desc;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.video_play);
 		title = (TextView) findViewById(R.id.title);
 		desc = (TextView) findViewById(R.id.desc);
-		videoView = (VideoViewBFB) findViewById(R.id.video_view);
-		videoView.setMediaController(new MediaController(this));
+		video_desc = findViewById(R.id.video_desc);
+		videoView = (VideoViewBFBP) findViewById(R.id.video_view);
+		if (isLandScape(this)) {
+			handleLandscape();
+		} else {
+			handlePortrait();
+		}
 		Bundle extras = getIntent().getExtras();
 		if (extras != null && extras.getString("video") != null) {
 			videoView.setOnPreparedListener(this);
@@ -44,6 +62,37 @@ public class VideoPlayActivity extends Activity implements
 		} else {
 			finish();
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			handleLandscape();
+		} else {
+			handlePortrait();
+		}
+	}
+
+	private void handleLandscape() {
+		RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		videoView.setLayoutParams(p);
+		video_desc.setVisibility(View.GONE);
+	}
+
+	private void handlePortrait() {
+		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		int width = displaymetrics.widthPixels;
+		int height = Math.round(width / 1.77f);
+		RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, height);
+		videoView.setLayoutParams(p);
+		RelativeLayout.LayoutParams p2 = new RelativeLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		p2.addRule(RelativeLayout.BELOW, R.id.video_view);
+		video_desc.setLayoutParams(p2);
+		video_desc.setVisibility(View.VISIBLE);
 	}
 
 	@Override
@@ -90,6 +139,16 @@ public class VideoPlayActivity extends Activity implements
 	@Override
 	public void onCompletion(MediaPlayer mp) {
 
+	}
+
+	public static boolean isLandScape(Activity activity) {
+		boolean isLandscape = false;
+		int displayOrientation = 0;
+		displayOrientation = activity.getResources().getConfiguration().orientation;
+		if (displayOrientation == 0 || displayOrientation == 2) {
+			isLandscape = true;
+		}
+		return isLandscape;
 	}
 
 }
