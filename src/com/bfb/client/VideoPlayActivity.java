@@ -16,17 +16,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bfm.model.VideoEntity;
-import com.bfm.view.VideoViewBFBP;
+import com.bfm.view.VideoViewBFB;
 import com.google.gson.Gson;
 
 public class VideoPlayActivity extends Activity implements
-		OnCompletionListener, MediaPlayer.OnPreparedListener, OnErrorListener {
+		OnCompletionListener, OnErrorListener {
 
 	private TextView title;
 
 	private TextView desc;
 
-	private VideoViewBFBP videoView = null;
+	private VideoViewBFB videoView = null;
 
 	private DisplayMetrics displaymetrics = new DisplayMetrics();
 
@@ -44,7 +44,7 @@ public class VideoPlayActivity extends Activity implements
 		title = (TextView) findViewById(R.id.title);
 		desc = (TextView) findViewById(R.id.desc);
 		video_desc = findViewById(R.id.video_desc);
-		videoView = (VideoViewBFBP) findViewById(R.id.video_view);
+		videoView = (VideoViewBFB) findViewById(R.id.video_view);
 		if (isLandScape(this)) {
 			handleLandscape();
 		} else {
@@ -52,7 +52,6 @@ public class VideoPlayActivity extends Activity implements
 		}
 		Bundle extras = getIntent().getExtras();
 		if (extras != null && extras.getString("video") != null) {
-			videoView.setOnPreparedListener(this);
 			videoView.setOnCompletionListener(this);
 			videoView.setOnErrorListener(this);
 			ve = new Gson().fromJson(extras.getString("video"),
@@ -129,11 +128,6 @@ public class VideoPlayActivity extends Activity implements
 		Toast.makeText(getApplicationContext(),
 				"Not supported" + ve.getTitle(), Toast.LENGTH_LONG).show();
 		return false;
-	}
-
-	@Override
-	public void onPrepared(MediaPlayer mp) {
-
 	}
 
 	@Override
