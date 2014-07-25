@@ -228,8 +228,12 @@ Calling activity/fragment should call following methods:
 	-keep public class com.bfio.** { *; } 
 	-keepattributes Signature
 	
+	
 	# If not using android support library then add following lines as well
 	-dontwarn android.support.v4.**
+	
+	# If using google play service
+	-keep class com.google.android.gms.common.GooglePlayServicesUtil {*;}
 ```
 
 For more details, please refer to sample android app demonstrating above api calls.
