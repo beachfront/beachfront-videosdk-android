@@ -21,13 +21,15 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 * BeachFront Android SDK (https://github.com/beachfront/beachfront-videosdk-android/tree/master/libs)
 * Android 2.2 and above
 * GSON jar (https://code.google.com/p/google-gson/downloads/list)
+* Google play services should be integrated (applicable for GPlay enabled device)      
+  http://developer.android.com/google/play-services/setup.html
+
 
 
 ## Installation
 
-1. Download the BeachFront Android SDK & GSON jar file, copy into the lib folder of your Android Project
-
-2. Create a bfmconfig.xml file and with following content & put bfmconfig.xml file to res folder of your android project.
+* Download the BeachFront Android SDK & GSON jar file, copy into the lib folder of your Android Project
+* Create a bfmconfig.xml file and with following content & put bfmconfig.xml file to res folder of your android project.
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -41,6 +43,11 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 
 </resources>
 ```
+* Ensure that you updated your application's manifest file to include the following tags as children of the <application> tag:Add an Activity in the application node of AndroidManifest.xml (Applicable for Gplay enabled devices):
+
+```
+<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+``` 
 
 ## Example Code
 
