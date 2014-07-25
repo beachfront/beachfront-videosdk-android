@@ -212,6 +212,18 @@ Calling activity/fragment should call following methods:
 	 */
 	public void videoSharedTracker(VideoEntity video, SocialType shareTo)
 ```
+## Build Settings:
+
+####  Proguard - If your application is using proguard then add following lines in proguard config file
+
+```
+	-keep public class com.bfm.** { *; }
+	-keep public class com.bfio.** { *; } 
+	-keepattributes Signature
+	
+	# If not using android support library then add following lines as well
+	-dontwarn android.support.v4.**
+```
 
 For more details, please refer to sample android app demonstrating above api calls.
 
