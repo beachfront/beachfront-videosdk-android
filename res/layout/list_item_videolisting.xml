@@ -23,28 +23,37 @@
             android:background="#80000000" >
 
             <TextView
-                android:id="@+id/video_listing_item_duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="5dp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/video_listing_item_duration_text_size" />
-
-            <TextView
                 android:id="@+id/video_listing_item_title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@id/video_listing_item_duration"
                 android:singleLine="true"
                 android:textColor="@color/white"
                 android:textSize="@dimen/video_listing_item_title_text_size"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/video_listing_item_views"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/video_listing_item_title"
+                android:layout_centerInParent="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/video_listing_item_duration_text_size" />
+
+            <TextView
+                android:id="@+id/video_listing_item_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/video_listing_item_title"
+                android:layout_marginRight="5dp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/video_listing_item_duration_text_size" />
+
+            <TextView
                 android:id="@+id/video_listing_item_updated"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_below="@id/video_listing_item_title"

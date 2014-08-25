@@ -1,6 +1,7 @@
 package com.bfb.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
@@ -11,6 +12,7 @@ import android.text.Html;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -27,13 +29,15 @@ import android.widget.TextView;
 
 import com.bfb.utils.DrawableManager;
 import com.bfm.api.Error;
+import com.bfm.common.VideoDateComp;
+import com.bfm.common.VideoViewsComp;
 import com.bfm.listeners.VideosFetchListener;
 import com.bfm.model.VideoEntity;
 import com.bfm.sdk.VideoSDK;
 import com.google.gson.Gson;
 
 public class VideoListingActivity extends Activity implements
-		VideosFetchListener {
+		VideosFetchListener, OnClickListener {
 
 	private TextView title;
 	private EditText search;
@@ -42,6 +46,8 @@ public class VideoListingActivity extends Activity implements
 	private ChannelAdaptor adaptor;
 	private VideoEntity videoEntity;
 	private ListView listView;
+	private TextView sort_by_date;
+	private TextView sort_by_views;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +56,12 @@ public class VideoListingActivity extends Activity implements
 		title = (TextView) findViewById(R.id.channel_name);
 		search = (EditText) findViewById(R.id.search_edit_box);
 		listView = (ListView) findViewById(R.id.video_list);
+		sort_by_date = (TextView) findViewById(R.id.sort_by_date);
+		sort_by_views = (TextView) findViewById(R.id.sort_by_views);
+		sort_by_views.setOnClickListener(this);
+		sort_by_date.setOnClickListener(this);
+		sort_by_views.setVisibility(View.GONE);
+		sort_by_date.setVisibility(View.VISIBLE);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -105,6 +117,7 @@ public class VideoListingActivity extends Activity implements
 		public ImageView image;
 		public TextView duration;
 		public TextView updated;
+		public TextView views;
 
 	}
 
@@ -131,7 +144,8 @@ public class VideoListingActivity extends Activity implements
 					.findViewById(R.id.video_listing_item_updated);
 			holder.image = (ImageView) cellLayout
 					.findViewById(R.id.video_listing_item_image);
-
+			holder.views = (TextView) cellLayout
+					.findViewById(R.id.video_listing_item_views);
 			if (t.getImage() != null && !t.getImage().isRecycled()) {
 				holder.image.setImageBitmap(t.getImage());
 			} else {
@@ -139,9 +153,10 @@ public class VideoListingActivity extends Activity implements
 						t.getImageUrl(), holder.image);
 			}
 			cellLayout.setTag(R.id.video_id, t);
-			holder.duration.setText(t.getLengthonImage());
-			holder.updated.setText(t.getPubDate());
 			holder.title.setText(Html.fromHtml(t.getTitle()));
+			holder.duration.setText(t.getLengthonImage());
+			holder.views.setText(t.getViews() + " Views");
+			holder.updated.setText(t.getFriendlyTime());
 			return cellLayout;
 		}
 
@@ -186,11 +201,33 @@ public class VideoListingActivity extends Activity implements
 		if (error == null) {
 			title.setText("Videos loaded");
 			this.videos = videoEntites;
+			Collections.sort(videos, new VideoDateComp());
 			adaptor.notifyDataSetChanged();
+			sort_by_views.setVisibility(View.GONE);
+			sort_by_date.setVisibility(View.VISIBLE);
 		} else {
 			title.setText(error.getErrorType().toString());
 		}
-
 	}
 
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.sort_by_views:
+			Collections.sort(videos, new VideoDateComp());
+			adaptor.notifyDataSetChanged();
+			sort_by_views.setVisibility(View.GONE);
+			sort_by_date.setVisibility(View.VISIBLE);
+			break;
+		case R.id.sort_by_date:
+			Collections.sort(videos, new VideoViewsComp());
+			adaptor.notifyDataSetChanged();
+			sort_by_views.setVisibility(View.VISIBLE);
+			sort_by_date.setVisibility(View.GONE);
+			break;
+		default:
+			break;
+		}
+
+	}
 }
