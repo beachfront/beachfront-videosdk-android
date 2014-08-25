@@ -27,7 +27,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="8dp"
-            android:text="by date" />
+            android:text="by date"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/sort_by_views"
@@ -37,6 +38,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="8dp"
             android:text="by views"
+            android:textStyle="bold"
             android:visibility="gone" />
     </RelativeLayout>
 
