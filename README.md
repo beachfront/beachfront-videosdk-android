@@ -20,7 +20,7 @@ A more developer-friendly way of working with Beachfront Media Android SDK,  Sim
 * BeachFront Builder app id, app version & secret key
 * BeachFront Android SDK (https://github.com/beachfront/beachfront-videosdk-android/tree/master/libs)
 * Android 2.2 and above
-* GSON jar (https://code.google.com/p/google-gson/downloads/list)
+* Latest GSON jar (http://mvnrepository.com/artifact/com.google.code.gson/gson/2.3)
 * Google play services should be integrated (applicable for GPlay enabled device)      
   http://developer.android.com/google/play-services/setup.html
 
