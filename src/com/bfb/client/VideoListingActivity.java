@@ -1,11 +1,14 @@
 package com.bfb.client;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -16,6 +19,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -27,19 +32,29 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.bfb.utils.DrawableManager;
+import com.bfb.utils.URLFileNameGenerator;
 import com.bfm.api.Error;
+import com.bfm.api.Error.ErrorType;
 import com.bfm.common.VideoDateComp;
 import com.bfm.common.VideoViewsComp;
 import com.bfm.listeners.VideosFetchListener;
 import com.bfm.model.VideoEntity;
 import com.bfm.sdk.VideoSDK;
 import com.google.gson.Gson;
+import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.utils.L;
 
 public class VideoListingActivity extends Activity implements
-		VideosFetchListener, OnClickListener {
+		VideosFetchListener, OnClickListener, OnScrollListener {
 
 	private TextView title;
+	public static final String DIR_NAME_IMAGE_CACHE = "image_cache";
 	private EditText search;
 	private List<VideoEntity> videos = new ArrayList<VideoEntity>();
 	private int displayHeight;
@@ -48,11 +63,26 @@ public class VideoListingActivity extends Activity implements
 	private ListView listView;
 	private TextView sort_by_date;
 	private TextView sort_by_views;
+	DisplayImageOptions options;
+	ImageLoader mImageLoader;
+	private DiscCacheAware mDiscCache;
+	private boolean loading = false;
+	private boolean complete = false;
+	private int currentPage = 1;
+	private int rpp = 30;
+	View footerView = null;
+	private Integer channedlId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.video_listing);
+		options = new DisplayImageOptions.Builder()
+				.resetViewBeforeLoading(false).cacheInMemory(true)
+				.cacheOnDisc(true).resetViewBeforeLoading(false)
+				.displayer(new FadeInBitmapDisplayer(100)) // default
+				.build();
+		footerView = getLayoutInflater().inflate(R.layout.footer, null, false);
 		title = (TextView) findViewById(R.id.channel_name);
 		search = (EditText) findViewById(R.id.search_edit_box);
 		listView = (ListView) findViewById(R.id.video_list);
@@ -72,6 +102,7 @@ public class VideoListingActivity extends Activity implements
 		});
 		adaptor = new ChannelAdaptor();
 		listView.setAdapter(adaptor);
+		listView.setOnScrollListener(this);
 		loadDisplay();
 		search.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
 		search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -106,7 +137,7 @@ public class VideoListingActivity extends Activity implements
 		super.onResume();
 		videos.clear();
 		adaptor.notifyDataSetChanged();
-		Integer channedlId = getIntent().getExtras().getInt("channel_id");
+		channedlId = getIntent().getExtras().getInt("channel_id");
 		VideoSDK.getInstance(this).getChannelVideos(this, 1, 30,
 				channedlId + "");
 		title.setText("Loading Videos...");
@@ -149,8 +180,8 @@ public class VideoListingActivity extends Activity implements
 			if (t.getImage() != null && !t.getImage().isRecycled()) {
 				holder.image.setImageBitmap(t.getImage());
 			} else {
-				DrawableManager.getInstance().fetchDrawableOnThread(
-						t.getImageUrl(), holder.image);
+				getImageLoader().displayImage(t.getImageUrl(), holder.image,
+						options, null);
 			}
 			cellLayout.setTag(R.id.video_id, t);
 			holder.title.setText(Html.fromHtml(t.getTitle()));
@@ -198,16 +229,106 @@ public class VideoListingActivity extends Activity implements
 
 	@Override
 	public void onVideosFetch(Error error, List<VideoEntity> videoEntites) {
-		if (error == null) {
-			title.setText("Videos loaded");
-			this.videos = videoEntites;
-			Collections.sort(videos, new VideoDateComp());
+		try {
+			loading = false;
+			if (currentPage != 1)
+				listView.removeFooterView(footerView);
+			if (error == null) {
+				title.setText("Videos loaded");
+				if (!videoEntites.isEmpty()) {
+					if (currentPage == 1)
+						videos.clear();
+					Collections.sort(videos, new VideoDateComp());
+					sort_by_views.setVisibility(View.GONE);
+					sort_by_date.setVisibility(View.VISIBLE);
+					videos.addAll(videoEntites);
+					adaptor.notifyDataSetChanged();
+				}
+			} else if (error.getErrorType() == ErrorType.NOT_COONECTED) {
+				new AlertDialog.Builder(this)
+						.setMessage(
+								"Please reconnect to the internet to use this application")
+						.setTitle("Connection Error")
+						.setCancelable(false)
+						.setPositiveButton("Retry",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.dismiss();
+										VideoSDK.getInstance(
+												VideoListingActivity.this)
+												.getChannelVideos(
+														VideoListingActivity.this,
+														currentPage, 30,
+														channedlId + "");
+									}
+								})
+						.setNegativeButton("Cancel",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.dismiss();
+									}
+								}).show();
+			} else if (error.getErrorType() == ErrorType.NETWORK_FAIL) {
+				new AlertDialog.Builder(VideoListingActivity.this)
+						.setMessage(
+								"Oops...There is something wrong at our servers, Please try after some time..")
+						.setTitle(getString(R.string.app_name))
+						.setCancelable(false)
+						.setPositiveButton("Retry",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										VideoSDK.getInstance(
+												VideoListingActivity.this)
+												.getChannelVideos(
+														VideoListingActivity.this,
+														currentPage, 30,
+														channedlId + "");
+									}
+								})
+						.setNegativeButton("Cancel",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.dismiss();
+									}
+								}).show();
+
+			} else if (error.getErrorType() == ErrorType.INFO_NOT_RECEIVED) {
+				new AlertDialog.Builder(VideoListingActivity.this)
+						.setMessage(
+								"Oops...There is something went wrong, Please try again")
+						.setTitle(getString(R.string.app_name))
+						.setCancelable(false)
+						.setPositiveButton("Retry",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										VideoSDK.getInstance(
+												VideoListingActivity.this)
+												.getChannelVideos(
+														VideoListingActivity.this,
+														currentPage, 30,
+														channedlId + "");
+									}
+								})
+						.setNegativeButton("Cancel",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.dismiss();
+
+									}
+								}).show();
+
+			}
 			adaptor.notifyDataSetChanged();
-			sort_by_views.setVisibility(View.GONE);
-			sort_by_date.setVisibility(View.VISIBLE);
-		} else {
-			title.setText(error.getErrorType().toString());
+		} catch (Exception e) {
+
 		}
+
 	}
 
 	@Override
@@ -228,6 +349,77 @@ public class VideoListingActivity extends Activity implements
 		default:
 			break;
 		}
+
+	}
+
+	public ImageLoader getImageLoader() {
+		if (mImageLoader != null)
+			return mImageLoader;
+		final ImageLoader loader = ImageLoader.getInstance();
+		final ImageLoaderConfiguration.Builder cb = new ImageLoaderConfiguration.Builder(
+				this);
+		cb.threadPriority(Thread.NORM_PRIORITY - 2);
+		cb.denyCacheImageMultipleSizesInMemory();
+		cb.tasksProcessingOrder(QueueProcessingType.LIFO);
+		cb.discCache(getDiscCache());
+		L.disableLogging();
+		loader.init(cb.build());
+		return mImageLoader = loader;
+	}
+
+	private DiscCacheAware getDiscCache() {
+		if (mDiscCache != null)
+			return mDiscCache;
+		return mDiscCache = getDiscCache(DIR_NAME_IMAGE_CACHE);
+	}
+
+	private DiscCacheAware getDiscCache(final String dirName) {
+		final File cacheDir = getBestCacheDir(this, dirName);
+		return new UnlimitedDiscCache(cacheDir, new URLFileNameGenerator());
+	}
+
+	public static File getBestCacheDir(final Context context,
+			final String cacheDirName) {
+		if (context == null)
+			throw new NullPointerException();
+		final File extCacheDir;
+		try {
+			// Workaround for https://github.com/mariotaku/twidere/issues/138
+			extCacheDir = context.getExternalCacheDir();
+		} catch (final Exception e) {
+			return new File(context.getCacheDir(), cacheDirName);
+		}
+		if (extCacheDir != null && extCacheDir.isDirectory()) {
+			final File cacheDir = new File(extCacheDir, cacheDirName);
+			if (cacheDir.isDirectory() || cacheDir.mkdirs())
+				return cacheDir;
+		}
+		return new File(context.getCacheDir(), cacheDirName);
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		try {
+			if (!loading && totalItemCount != 2 && !complete
+					&& totalItemCount <= (firstVisibleItem + visibleItemCount)
+					&& videos.size() > 10) {
+				currentPage++;
+				loading = true;
+				if (currentPage > 1)
+					listView.addFooterView(footerView);
+				VideoSDK.getInstance(this).getChannelVideos(this, currentPage,
+						rpp, channedlId + "");
+
+			}
+		} catch (IndexOutOfBoundsException e) {
+			// ignore for first case
+
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
 
 	}
 }
